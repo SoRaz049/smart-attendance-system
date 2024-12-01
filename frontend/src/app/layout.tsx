@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
-import FullWidthWrapper from "./components/FullWidthWrapper";
+import { Poppins } from "next/font/google";
 import { Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
+import AppProvider from "@/contexts/AppContexts";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -31,13 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${poppins.className} antialiased`}>
         <ToastContainer
           position="top-center"
           autoClose={3000}
-          hideProgressBar={false}
+          hideProgressBar={true}
           newestOnTop={false}
           closeOnClick
           rtl={false}
@@ -47,13 +36,9 @@ export default function RootLayout({
           theme="light"
           transition={Slide}
         />
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="w-full">
-            <Navbar />
-            <FullWidthWrapper>{children}</FullWidthWrapper>
-          </div>
-        </SidebarProvider>
+        <AppProvider>
+          <div className="w-full">{children}</div>
+        </AppProvider>
       </body>
     </html>
   );

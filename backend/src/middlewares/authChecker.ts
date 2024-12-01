@@ -1,6 +1,6 @@
 //@ts-nocheck
 import jwt from "jsonwebtoken";
-import { User } from "../models/administration/userModel";
+import { User } from "../models/userModel";
 
 export const authChecker = async (req: any, res: any, next: any) => {
   const authToken = req.cookies.token;

@@ -17,3 +17,12 @@ export const createCourse = async (req: Request, res: Response) => {
     handleError(res, error);
   }
 };
+
+export const getAllCourses = async (req: Request, res: Response) => {
+  try {
+    const courses = await Course.find();
+    return res.status(200).json(courses);
+  } catch (error) {
+    handleError(res, error);
+  }
+};

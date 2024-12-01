@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { Role } from "../models/administration/roleModel";
-import { User } from "../models/administration/userModel";
+import { User } from "../models/userModel";
 
 export const checkPermission = (module: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {

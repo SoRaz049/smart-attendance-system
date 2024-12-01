@@ -2,10 +2,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Request, Response } from "express";
 // import permissionRoute from "@/routes/administration/permissionRoute";
-// import userRoute from "@/routes/administration/user.route";
+import userRoute from "@/routes/userRoute";
 import attendanceRoute from "@/routes/attendance.route";
-import studentRoute from "@/routes/student.route";
-import faceEmbeddingRoute from "@/routes/faceEmbedding.route";
+import studentRoute from "@/routes/studentRoute";
+import faceEmbeddingRoute from "@/routes/faceEmbeddingRoute";
 import courseRoute from "@/routes/course.route";
 const app = express();
 
@@ -27,7 +27,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // SETUP ROUTES
-// app.use("/user", userRoute);
+app.use("/user", userRoute);
 app.use("/attendance", attendanceRoute);
 app.use("/student", studentRoute);
 app.use("/face-embedding", faceEmbeddingRoute);

@@ -1,7 +1,7 @@
 import {
   createFaceEmbedding,
   exportFaceEmbeddingsToCSV,
-} from "@/controllers/faceEmbedding.controller";
+} from "@/controllers/faceEmbeddingController";
 import express from "express";
 
 const Router = express.Router();

@@ -120,7 +120,7 @@ const AttendanceGrid: React.FC = () => {
     },
     {
       date: "2024-01-12",
-      attendance: 1,
+      attendance: 2,
     },
     {
       date: "2024-01-22",
@@ -132,11 +132,75 @@ const AttendanceGrid: React.FC = () => {
     },
     {
       date: "2024-01-26",
-      attendance: 2,
+      attendance: 1,
     },
     {
       date: "2024-01-27",
       attendance: 2,
+    },
+    {
+      date: "2024-10-25",
+      attendance: 1,
+    },
+    {
+      date: "2024-10-26",
+      attendance: 1,
+    },
+    {
+      date: "2024-11-03",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-04",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-11",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-12",
+      attendance: 1,
+    },
+    {
+      date: "2024-11-15",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-16",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-17",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-18",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-21",
+      attendance: 1,
+    },
+    {
+      date: "2024-11-22",
+      attendance: 1,
+    },
+    {
+      date: "2024-11-23",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-24",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-26",
+      attendance: 2,
+    },
+    {
+      date: "2024-11-27",
+      attendance: 1,
     },
   ];
 
@@ -193,50 +257,73 @@ const AttendanceGrid: React.FC = () => {
   }, []);
 
   return (
-    <div
-      ref={gridRef}
-      className="attendance-grid w-full overflow-x-auto h-32 text-sm"
-      onMouseLeave={() => setActiveDay(null)}
-    >
-      {Array.from({ length: emptyCells }).map((_, index) => (
-        <div key={`empty-${index}`} className="attendance-cell empty"></div>
-      ))}
-
-      {fullAttendanceData.map((day, index) => (
+    <div className="flex gap-1">
+      <div className="text-xs flex flex-col items-end">
+        <p className="mt-9">Mon</p>
+        <p className="mt-[18px]">Wed</p>
+        <p className="mt-[18px]">Fri</p>
+      </div>
+      <div>
+        <div className="flex text-sm ">
+          <div className="ml-[16px]">Dec</div>
+          <div className="ml-[36px]">Jan</div>
+          <div className="ml-[40px]">Feb</div>
+          <div className="ml-[38px]">Mar</div>
+          <div className="ml-[55px]">Apr</div>
+          <div className="ml-[38px]">May</div>
+          <div className="ml-[34px]">Jun</div>
+          <div className="ml-[55px]">Jul</div>
+          <div className="ml-[45px]">Aug</div>
+          <div className="ml-[52px]">Sep</div>
+          <div className="ml-[40px]">Oct</div>
+          <div className="ml-[36px]">Nov</div>
+        </div>
         <div
-          key={index}
-          className={`grid-cell ${
-            day.attendance === 0 ? "border" : ""
-          } border-gray-300`}
-          style={{ backgroundColor: getColor(day.attendance) }}
-          onMouseEnter={() => setActiveDay(day)}
-          aria-label={`Date: ${day.date}, Attendance: ${
-            day.attendance === 2
-              ? "Present"
-              : day.attendance === 1
-              ? "Late"
-              : "Absent"
-          }`}
-        />
-      ))}
-      {activeDay && (
-        <SmoothTooltip
-          content={`${new Date(activeDay.date).toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}`}
-          attendance={
-            activeDay.attendance === 2
-              ? "Present"
-              : activeDay.attendance === 1
-              ? "Late"
-              : "Absent"
-          }
-          position={tooltipPosition}
-        />
-      )}
+          ref={gridRef}
+          className="attendance-grid w-full overflow-x-auto h-32 text-sm"
+          onMouseLeave={() => setActiveDay(null)}
+        >
+          {Array.from({ length: emptyCells }).map((_, index) => (
+            <div key={`empty-${index}`} className="attendance-cell empty"></div>
+          ))}
+
+          {fullAttendanceData.map((day, index) => (
+            <div
+              key={index}
+              className={`grid-cell ${
+                day.attendance === 0 ? "border" : ""
+              } border-gray-300`}
+              style={{ backgroundColor: getColor(day.attendance) }}
+              onMouseEnter={() => setActiveDay(day)}
+              aria-label={`Date: ${day.date}, Attendance: ${
+                day.attendance === 2
+                  ? "Present"
+                  : day.attendance === 1
+                  ? "Late"
+                  : "Absent"
+              }`}
+            />
+          ))}
+          {activeDay && (
+            <SmoothTooltip
+              content={`${new Date(activeDay.date).toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}`}
+              attendance={
+                activeDay.attendance === 2
+                  ? "Present"
+                  : activeDay.attendance === 1
+                  ? "Late"
+                  : "Absent"
+              }
+              position={tooltipPosition}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

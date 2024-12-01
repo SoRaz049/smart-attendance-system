@@ -1,5 +1,5 @@
 import { Role } from "@/models/administration/roleModel";
-import { User } from "@/models/administration/userModel";
+import { User } from "@/models/userModel";
 import { sendUpdatedRole } from "@/routes/administration/roleRoute";
 import { Request, Response } from "express";
 

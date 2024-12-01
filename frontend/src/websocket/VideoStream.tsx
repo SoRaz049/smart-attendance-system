@@ -86,24 +86,24 @@ const VideoStreamHandler = () => {
         ref={videoRef}
         autoPlay
         muted
-        width="640"
-        height="480"
+        width="1000"
+        height="750"
         style={{ transform: "scaleX(-1)" }}
       ></video>
       <canvas
         ref={canvasRef}
-        width="640"
-        height="480"
+        width="1000"
+        height="750"
         style={{ display: "none" }}
       ></canvas>
-      <button
+      {/* <button
         onClick={() => {
           setSendFrames(!sendFrames);
         }}
       >
         {" "}
         {sendFrames ? "Stop" : "Start"}
-      </button>
+      </button> */}
     </div>
   );
 };

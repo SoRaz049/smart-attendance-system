@@ -1,7 +1,7 @@
 import { Server as SocketServer } from "socket.io";
 import { Server as HttpServer } from "http";
 import fs from "fs";
-import path from "path"; // Import path module
+import path from "path";
 
 export function setupWebSocket(server: HttpServer): void {
   const io = new SocketServer(server, {
@@ -13,7 +13,6 @@ export function setupWebSocket(server: HttpServer): void {
 
   const framesFolder = path.resolve(__dirname, "frames");
 
-  // Ensure the folder exists
   if (!fs.existsSync(framesFolder)) {
     fs.mkdirSync(framesFolder, { recursive: true });
     console.log(`Frames folder created at: ${framesFolder}`);
@@ -31,7 +30,7 @@ export function setupWebSocket(server: HttpServer): void {
 
       const base64Data = frame.frame.replace(/^data:image\/jpeg;base64,/, "");
 
-      //   const fileName = `frame_${Date.now()}.jpg`;
+      // const fileName = `frame_${Date.now()}.jpg`;
       const fileName = `decoded_frame.jpg`;
 
       const filePath = path.join(framesFolder, fileName);

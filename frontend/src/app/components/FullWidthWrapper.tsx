@@ -2,13 +2,13 @@ import React from "react";
 
 const FullWidthWrapper = ({
   children,
-  className,
+  className = "", // Provide a default value for className
 }: {
   children: React.ReactNode;
   className?: string;
 }) => {
   return (
-    <div className={`container mx-auto w-full px-4 pt-4 ${className}`}>
+    <div className={`container mx-auto w-full p-4 ${className}`}>
       {children}
     </div>
   );

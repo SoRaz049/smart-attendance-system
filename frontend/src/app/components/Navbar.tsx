@@ -18,7 +18,7 @@ const Navbar = () => {
 
   useEffect(() => {
     if (pathname) {
-      const firstPathSegment = pathname.split("/")[1];
+      const firstPathSegment = pathname.split("/")[2];
       setCurrentPath(firstPathSegment);
     }
   }, [pathname]);
@@ -28,7 +28,7 @@ const Navbar = () => {
       <div className="md:hidden p-1">
         <SidebarTrigger />
       </div>
-      <FullWidthWrapper className="flex items-center justify-between pt-0 pl-0 md:pl-4">
+      <FullWidthWrapper className="flex items-center justify-between md:pl-4">
         <div>
           <h1 className="text-xl font-semibold ">
             {links[currentPath as keyof typeof links] || "Dashboard"}
@@ -36,8 +36,8 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-2">
           <div className="details text-right">
-            <p className="text-sm font-medium">Satya Bahadur</p>
-            <p className="text-xs text-muted-foreground">Teacher</p>
+            <p className="text-sm font-medium">Robin Siwakoti</p>
+            <p className="text-xs text-muted-foreground">Coordinator</p>
           </div>
           <Avatar>
             <AvatarImage src="https://github.com/shadcn.png" />

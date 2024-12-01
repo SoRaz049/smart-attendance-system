@@ -4,7 +4,10 @@ export interface StudentDetails {
   email: string;
   address: string;
   dateOfBirth: string;
-  course: string;
+  courseRef: {
+    name: string;
+    courseCode: string;
+  };
   batch: string;
   section: string;
   contactNo: string;
