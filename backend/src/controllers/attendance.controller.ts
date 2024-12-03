@@ -5,13 +5,13 @@ import { Attendance } from "@/models/attendanceModel";
 // POST request to create
 export const newAttendance = async (req: Request, res: Response) => {
   const { studentId, date, isLate } = req.body;
-
+  console.log(studentId);
   if (!studentId) {
     return res.status(400).json({ message: "Student ID is required" });
   }
 
   try {
-    const student = await Student.findById(studentId);
+    const student = await Student.findById(studentId).populate("courseRef");
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
@@ -27,12 +27,18 @@ export const newAttendance = async (req: Request, res: Response) => {
     });
 
     if (existingAttendance) {
-      return res
-        .status(400)
-        .json({ message: "Attendance already marked for today" });
+      return res.status(400).json({
+        message: "Attendance already marked for today",
+        student: {
+          _id: student._id,
+          name: student.name,
+          idNumber: student.idNumber,
+          course: student.courseRef.name,
+        },
+      });
     }
 
-    const newAttendance = new Attendance({
+    const newAttendance = await Attendance.create({
       student: student._id,
       date: today,
       time: currentTime,
@@ -40,9 +46,15 @@ export const newAttendance = async (req: Request, res: Response) => {
     });
     console.log(newAttendance);
 
-    await newAttendance.save();
-
-    return res.status(201).json(newAttendance);
+    return res.status(201).json({
+      attendance: newAttendance,
+      student: {
+        _id: student._id,
+        name: student.name,
+        idNumber: student.idNumber,
+        course: student.courseRef.name,
+      },
+    });
   } catch (error: any) {
     console.error("Error marking attendance:", error);
     return res.status(500).json({

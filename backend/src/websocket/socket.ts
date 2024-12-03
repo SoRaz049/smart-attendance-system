@@ -25,23 +25,23 @@ export function setupWebSocket(server: HttpServer): void {
       console.log("Message: ", msg);
     });
 
-    socket.on("frame", (frame) => {
+    socket.on("check", (frame) => {
       console.log("Frame received.");
 
-      const base64Data = frame.frame.replace(/^data:image\/jpeg;base64,/, "");
+      // const base64Data = frame.frame.replace(/^data:image\/jpeg;base64,/, "");
 
-      // const fileName = `frame_${Date.now()}.jpg`;
-      const fileName = `decoded_frame.jpg`;
+      // // const fileName = `frame_${Date.now()}.jpg`;
+      // const fileName = `decoded_frame.jpg`;
 
-      const filePath = path.join(framesFolder, fileName);
+      // const filePath = path.join(framesFolder, fileName);
 
-      fs.writeFile(filePath, base64Data, "base64", (err) => {
-        if (err) {
-          console.error("Error decoding and saving frame:", err);
-        } else {
-          console.log(`Frame successfully saved at: ${filePath}`);
-        }
-      });
+      // fs.writeFile(filePath, base64Data, "base64", (err) => {
+      //   if (err) {
+      //     console.error("Error decoding and saving frame:", err);
+      //   } else {
+      //     console.log(`Frame successfully saved at: ${filePath}`);
+      //   }
+      // });
     });
 
     socket.on("disconnect", () => {
