@@ -29,7 +29,9 @@ inception_resnet = InceptionResnetV1(pretrained="vggface2").to(device).eval()
 current_frames = []
 frame_count = 0
 max_frames = 150
-is_check_mode = False
+is_registering = False
+is_checking = False
+student_id = None
 
 embeddings_path = "ML/embeddings/"
 if not os.path.exists(embeddings_path):
@@ -76,20 +78,28 @@ def preprocess_and_generate_embedding(image):
 
 
 # WebSocket events
-@socketio.on("start")
-def start_capture():
-    global current_frames, frame_count, is_check_mode
+@socketio.on("register-start")
+def start_capture(data):
+    global current_frames, frame_count, is_registering, student_id
     current_frames = []
     frame_count = 0
-    is_check_mode = False
-    emit("message", "Started capturing frames...")
+    is_registering = True
+    student_id = data["studentId"]
+    emit("reg_3", {"succcess":2, "message":"Started capturing frame"})
 
 
-@socketio.on("frame")
+@socketio.on("register-frame")
 def handle_frame(data):
+    global is_registering, student_id
+    if not is_registering:
+        emit("reg_3", {"success":2, "message":"Please start registration first"})
+        return
+    print("Frame Received")
     global frame_count
     if frame_count >= max_frames:
-        emit("message", f"Capture stopped after {max_frames} frames.")
+        is_registering = False
+        # emit("reg_2", f"Capture stopped after {max_frames} frames.")
+        stop_capture()
         return
 
     try:
@@ -98,41 +108,58 @@ def handle_frame(data):
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         if img is None:
-            emit("message", "Failed to decode image.")
+            print("Failed to decode image.")
             return
 
         embedding = preprocess_and_generate_embedding(img)
 
         if embedding is not None:
+            print("Embedding Generated", frame_count)
+            emit("reg_1", {"message":f"Embedding Generated {frame_count}/{max_frames}"})
             current_frames.append(embedding)
             frame_count += 1
         else:
-            emit("message", "No face detected in the frame.")
+            emit("reg_2", {"success":0, "message":"No face detected in the frame."})
     except Exception as e:
-        emit("message", f"Error processing frame: {e}")
+        emit("reg_3", {"success":0, "message":f"Error processing frame. Please check terminal"})
 
 
-@socketio.on("stop")
-def stop_capture(data):
-    if len(current_frames) > 0:
-        student_id = data["id"]
-        name = data["name"]
-        details = data["details"]
-
+@socketio.on("register-stop")
+def stop_capture():
+    global is_registering, student_id, max_frames
+    is_registering = False
+    if len(current_frames) >= max_frames:
         # Calculate and save median embedding
         median_embedding = geometric_median(np.array(current_frames))
         np.save(os.path.join(embeddings_path, f"{student_id}.npy"), median_embedding)
-
-        # Save student details in MongoDB
-        add_student_to_db(student_id, name, details)
-        emit("message", "Registration completed successfully!")
+        is_registering = False
+        emit("reg_2",{"success":1, "message": "Registration completed successfully!"})
     else:
-        emit("message", "No frames captured. Please try again.")
+        emit("reg_2", {"success":0, "message": "Not enough data. Please try again."})
 
+@socketio.on("face-check-start")
+def start_check():
+    global is_checking
+    is_checking = True
+    # emit("check_1", {"message":"Checking Face"})
+    print("Checking Face")
 
-@socketio.on("check")
+@socketio.on("face-check-stop")
+def stop_check():
+    global is_checking
+    is_checking = False
+    # emit("check_1", {"message":"Checking Stopped"})
+    print("Checking Stopped")
+
+@socketio.on("face-check")
 def check_attendance(data):
-    student_id = None
+    global is_checking, student_id
+    if not is_checking:
+        emit("check_3", {"success":2, "message":"Please start checking first"})
+        return
+    print("Checking Attendance")
+
+
     best_score = 0.0
 
     # Load stored embeddings
@@ -149,9 +176,9 @@ def check_attendance(data):
     embedding = preprocess_and_generate_embedding(img)
 
     if embedding is None:
-        emit("message", "No face detected.")
+        emit("check_2", {"success":0, "message":"No face detected."})
         return
-
+    # print("Face Detected")
     # Compare embeddings
     for stored_id, stored_embedding in embeddings:
         similarity_score = cosine_similarity(embedding, stored_embedding)
@@ -159,13 +186,13 @@ def check_attendance(data):
             best_score = similarity_score
             student_id = stored_id
 
-    if best_score > 0.8:  # Threshold
-        # student_details = get_student_details(student_id)
-        response = requests.post("http://localhost:3000/attendance", json = {"studentId": student_id} )
-        emit("message", f"Student recognized: {student_id}")
-        print(response)
+    if best_score > 0.8: 
+        # response = requests.post("http://localhost:3000/attendance", json = {"studentId": student_id} )
+        print(f"Student recognized: {student_id}")
+        emit("check_2", {"success":1, "message":f"Student recognized: {student_id}"})
+        # print(response)
     else:
-        emit("message", "No matching student found.")
+        emit("check_2", {"success":0, "message":"No matching student found."})
 
 
 if __name__ == "__main__":

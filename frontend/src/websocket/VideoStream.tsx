@@ -10,6 +10,25 @@ const socket = io("http://localhost:5000");
 const VideoStreamHandler = () => {
   const [sendFrames, setSendFrames] = useState(false);
   const [message, setMessage] = useState<String>("");
+  const [mode, setMode] = useState<"register" | "check">("check");
+  const [reg_1, setReg_1] = useState({
+    message: "",
+  });
+  const [reg_2, setReg_2] = useState({
+    message: "",
+  });
+  const [reg_3, setReg_3] = useState({
+    message: "",
+  });
+  const [check_1, setCheck_1] = useState({
+    message: "",
+  });
+  const [check_2, setCheck_2] = useState({
+    message: "",
+  });
+  const [check_3, setCheck_3] = useState({
+    message: "",
+  });
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -25,6 +44,36 @@ const VideoStreamHandler = () => {
 
     socket.on("error", (error) => {
       console.error("WebSocket error:", error);
+    });
+
+    socket.on("reg_1", (msg) => {
+      console.log(msg);
+      setReg_1({ ...reg_1, message: msg.message });
+    });
+
+    socket.on("reg_2", (msg) => {
+      console.log(msg);
+      setReg_2({ ...reg_2, message: msg.message });
+    });
+
+    socket.on("reg_3", (msg) => {
+      console.log(msg);
+      setReg_3({ ...reg_3, message: msg.message });
+    });
+
+    socket.on("check_1", (msg) => {
+      console.log(msg);
+      setCheck_1({ ...check_1, message: msg.message });
+    });
+
+    socket.on("check_2", (msg) => {
+      console.log(msg.message);
+      setCheck_2({ ...check_2, message: msg.message });
+    });
+
+    socket.on("check_3", (msg) => {
+      console.log(msg);
+      setCheck_3({ ...check_3, message: msg.message });
     });
 
     // Message received
@@ -84,7 +133,10 @@ const VideoStreamHandler = () => {
         const frame = canvas.toDataURL("image/jpeg");
 
         if (socket.connected) {
-          socket.emit("check", { frame });
+          // socket.emit("register-frame", { frame });
+          socket.emit(mode === "check" ? "face-check" : "register-frame", {
+            frame,
+          });
         } else {
           console.warn("Socket is not connected");
         }
@@ -146,13 +198,42 @@ const VideoStreamHandler = () => {
       ></canvas>
       <button
         onClick={() => {
+          setMode("check");
           setSendFrames(!sendFrames);
-          // socket.emit("test", "Hello");
+          if (sendFrames) {
+            // socket.emit("register-stop");
+            socket.emit("face-check-stop");
+          } else {
+            // socket.emit("register-start", { studentId: "1234569999" });
+            socket.emit("face-check-start");
+          }
         }}
       >
         {" "}
-        {sendFrames ? "Stop" : "Start"}
+        {sendFrames ? "Stop Check" : "Start Check"}
       </button>
+      <button
+        // className="ml-6"
+        style={{ marginLeft: "2rem" }}
+        onClick={() => {
+          setMode("register");
+          setSendFrames(!sendFrames);
+          if (sendFrames) {
+            socket.emit("register-stop");
+          } else {
+            socket.emit("register-start", { studentId: "aayan" });
+          }
+        }}
+      >
+        {" "}
+        {sendFrames ? "Stop Register" : "Start Register"}
+      </button>
+      <p>{reg_1.message}</p>
+      <p>{reg_2.message}</p>
+      <p>{reg_3.message}</p>
+      <p>{check_1.message}</p>
+      <p>{check_2.message}</p>
+      <p>{check_3.message}</p>
     </div>
   );
 };
