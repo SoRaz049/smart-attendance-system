@@ -1,16 +1,14 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 // Initialize the socket outside the component
 const socket = io("http://localhost:5000");
 
-const VideoStreamHandler = () => {
+const VideoStreamHandler = ({ mode }: { mode: "register" | "check" }) => {
   const [sendFrames, setSendFrames] = useState(false);
   const [message, setMessage] = useState<String>("");
-  const [mode, setMode] = useState<"register" | "check">("check");
   const [reg_1, setReg_1] = useState({
     message: "",
   });
@@ -133,7 +131,6 @@ const VideoStreamHandler = () => {
         const frame = canvas.toDataURL("image/jpeg");
 
         if (socket.connected) {
-          // socket.emit("register-frame", { frame });
           socket.emit(mode === "check" ? "face-check" : "register-frame", {
             frame,
           });
@@ -198,7 +195,6 @@ const VideoStreamHandler = () => {
       ></canvas>
       <button
         onClick={() => {
-          setMode("check");
           setSendFrames(!sendFrames);
           if (sendFrames) {
             // socket.emit("register-stop");
@@ -212,22 +208,7 @@ const VideoStreamHandler = () => {
         {" "}
         {sendFrames ? "Stop Check" : "Start Check"}
       </button>
-      <button
-        // className="ml-6"
-        style={{ marginLeft: "2rem" }}
-        onClick={() => {
-          setMode("register");
-          setSendFrames(!sendFrames);
-          if (sendFrames) {
-            socket.emit("register-stop");
-          } else {
-            socket.emit("register-start", { studentId: "aayan" });
-          }
-        }}
-      >
-        {" "}
-        {sendFrames ? "Stop Register" : "Start Register"}
-      </button>
+
       <p>{reg_1.message}</p>
       <p>{reg_2.message}</p>
       <p>{reg_3.message}</p>

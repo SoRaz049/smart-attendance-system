@@ -11,8 +11,7 @@ export const newAttendance = async (req: Request, res: Response) => {
   }
 
   try {
-    const student = await Student.findById(studentId).populate("courseRef");
-
+    const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
@@ -33,7 +32,7 @@ export const newAttendance = async (req: Request, res: Response) => {
           _id: student._id,
           name: student.name,
           idNumber: student.idNumber,
-          course: student.courseRef.name,
+          course: student.course,
         },
       });
     }
@@ -52,7 +51,7 @@ export const newAttendance = async (req: Request, res: Response) => {
         _id: student._id,
         name: student.name,
         idNumber: student.idNumber,
-        course: student.courseRef.name,
+        course: student.course,
       },
     });
   } catch (error: any) {

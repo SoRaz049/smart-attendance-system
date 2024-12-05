@@ -20,15 +20,15 @@ const StudentSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      required: true,
     },
     section: {
       type: String,
       required: true,
       default: "A",
     },
-    courseRef: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
+    course: {
+      type: String,
       required: true,
     },
     batch: {
@@ -37,10 +37,6 @@ const StudentSchema = new mongoose.Schema(
     },
     dateOfBirth: {
       type: Date,
-      required: true,
-    },
-    contactNo: {
-      type: String,
       required: true,
     },
     photoUrl: {
@@ -54,6 +50,10 @@ const StudentSchema = new mongoose.Schema(
     guardianContact: {
       type: String,
       required: true,
+    },
+    faceRegistered: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

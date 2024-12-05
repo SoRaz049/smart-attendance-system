@@ -1,5 +1,7 @@
+import { Attendance } from "@/models/attendanceModel";
 import { Student } from "@/models/studentModel";
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { SortOrder } from "mongoose";
 
 export const createStudent = async (req: Request, res: Response) => {
@@ -9,16 +11,17 @@ export const createStudent = async (req: Request, res: Response) => {
     email,
     phone,
     section,
-    courseRef,
+    course,
     batch,
     dateOfBirth,
-    contactNo,
     photoUrl,
     guardianName,
     guardianContact,
   } = req.body;
 
   console.log("Request Body: ", req.body);
+
+  console.log("Body: ", req.body);
   try {
     const existingStudent = await Student.findOne({
       $or: [{ idNumber }, { email }],
@@ -28,27 +31,23 @@ export const createStudent = async (req: Request, res: Response) => {
         .status(400)
         .json({ message: "Student with this ID or email already exists" });
     }
-
     const newStudent = await Student.create({
       name,
       idNumber,
       email,
       phone,
       section,
-      courseRef,
+      course,
       batch,
       dateOfBirth,
-      contactNo,
       photoUrl,
       guardianName,
       guardianContact,
     });
-
     if (!newStudent) {
       return res.status(500).json({ message: "Error creating student" });
     }
     console.log("New Student: ", newStudent);
-
     return res.status(201).json(newStudent);
   } catch (error: any) {
     return res.status(500).json({
@@ -66,20 +65,40 @@ export const getAllStudents = async (req: Request, res: Response) => {
     if (course) filters.courseRef = course;
     if (batch) filters.batch = batch;
 
-    const sortOptions: { [key: string]: SortOrder } = {};
+    const sortOptions: { [key: string]: mongoose.SortOrder } = {};
     if (sortField) {
-      sortOptions[sortField] = sortOrder === "desc" ? -1 : (1 as SortOrder);
+      sortOptions[sortField] = sortOrder === "desc" ? -1 : 1;
     }
 
-    const students = await Student.find(filters)
-      .sort(sortOptions)
-      .populate("courseRef");
+    // Fetch all students
+    const students = await Student.find(filters).sort(sortOptions);
 
-    if (!students.length) {
-      return res.status(404).json({ message: "No students found." });
-    }
+    // Fetch today's attendance records
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to the start of the day
+    const attendanceRecords = await Attendance.find({
+      date: today,
+    }).select("student isLate");
 
-    return res.status(200).json(students);
+    // Create a map for fast lookup of attendance
+    const attendanceMap = new Map<string, { isLate: boolean }>();
+    attendanceRecords.forEach((record) => {
+      attendanceMap.set(record.student.toString(), { isLate: record.isLate });
+    });
+
+    // Append attendance data to each student
+    const studentsWithAttendance = students.map((student) => {
+      const attendanceData = attendanceMap.get(student._id.toString());
+      return {
+        ...student.toObject(),
+        isPresent: !!attendanceData,
+        isLate: attendanceData?.isLate || false,
+      };
+    });
+
+    console.log("Students with attendance: ", studentsWithAttendance);
+
+    return res.status(200).json(studentsWithAttendance);
   } catch (error) {
     console.error("Error fetching students:", error);
     return res.status(500).json({ message: "Internal server error." });
@@ -89,7 +108,7 @@ export const getAllStudents = async (req: Request, res: Response) => {
 export const getStudentById = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const student = await Student.findById(id).populate("courseRef");
+    const student = await Student.findById(id);
     if (!student) {
       return res.status(404).json({ message: "Student not found." });
     }

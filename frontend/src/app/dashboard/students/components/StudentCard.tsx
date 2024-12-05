@@ -21,7 +21,7 @@ export default function StudentCard({ student }: { student: any }) {
         </div>
 
         <div className="flex flex-col items-center space-y-3 mb-6">
-          <Avatar className="h-20 w-20">
+          <Avatar className="h-20 w-20 border border-blue/40">
             <AvatarImage
               src={student.photoUrl}
               alt="Student"
@@ -35,7 +35,7 @@ export default function StudentCard({ student }: { student: any }) {
           </div>
         </div>
 
-        <div className="bg-muted/50 rounded-lg space-y-3">
+        <div className="rounded-lg space-y-3">
           <div className="flex items-center gap-2 text-sm">
             <span className="w-12">Id: </span>
             <span className="text-muted-foreground">{student.idNumber}</span>

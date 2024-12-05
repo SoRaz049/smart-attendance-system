@@ -8,6 +8,7 @@ import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 import { Student } from "@/types";
+import { toast } from "react-toastify";
 
 const StudentPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -133,9 +134,13 @@ const StudentPage = () => {
       const response = await axios.get(
         `${process.env.NEXT_PUBLIC_API_URL}/student`
       );
-      setStudents(response.data);
+      console.log(response);
+      if (response.status === 200) {
+        setStudents(response.data);
+      }
     } catch (error) {
       console.log(error);
+      toast.error("Failed to fetch students");
     } finally {
       setFetching(false);
     }

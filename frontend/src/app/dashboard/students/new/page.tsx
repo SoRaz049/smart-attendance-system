@@ -15,7 +15,7 @@ import {
 import imageCompression from "browser-image-compression";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Loader2 } from "lucide-react";
+import { Image, Loader2, X } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -23,20 +23,22 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
 
 type StudentFormData = {
-  firstName: string;
-  lastName: string;
+  name: string;
   idNumber: string;
   email: string;
   phone: string;
   section: string;
-  courseRef: string;
+  course: string;
   batch: number;
   dateOfBirth: string;
   contactNo: string;
-  photoUrl: string;
+  photo: File;
   guardianName: string;
   guardianContact: string;
 };
@@ -48,19 +50,40 @@ export default function StudentRegistrationForm() {
     formState: { errors },
     setValue,
     reset,
+    clearErrors,
+    setError,
   } = useForm<StudentFormData>();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [image, setImage] = useState<File | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const router = useRouter();
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+      setSelectedImage(file);
+      setValue("photo", file);
+      clearErrors("photo");
+    }
+  };
+
   const onSubmit = async (data: StudentFormData) => {
+    console.log(data);
+    // return;
     try {
       setIsSubmitting(true);
       const validImageTypes = ["image/jpeg", "image/jpg", "image/png"];
       let imageUrl = "";
 
-      if (image) {
-        if (!validImageTypes.includes(image.type)) {
+      if (!selectedImage) {
+        setError("photo", { message: "Photo is required" });
+        return;
+      }
+
+      if (selectedImage) {
+        if (!validImageTypes.includes(selectedImage.type)) {
           toast.error(
             "Invalid image type. Only JPEG, JPG, and PNG are allowed."
           );
@@ -77,7 +100,7 @@ export default function StudentRegistrationForm() {
         };
 
         const compressedImage = await imageCompression(
-          image,
+          selectedImage,
           compressionOptions
         );
 
@@ -117,7 +140,7 @@ export default function StudentRegistrationForm() {
       if (response && response.status == 201) {
         toast.success("Student registered successfully");
         reset();
-        window.location.reload();
+        router.push("/dashboard/students");
       }
     } catch (error: any) {
       console.error("Error:", error);
@@ -131,32 +154,6 @@ export default function StudentRegistrationForm() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const [courses, setCourses] = useState([]);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/course`
-      );
-      if (response.status === 200) {
-        setCourses(response.data);
-      }
-    };
-    fetchCourses();
-  }, []);
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* General Info */}
@@ -165,29 +162,14 @@ export default function StudentRegistrationForm() {
           <h3 className="text-lg font-semibold">General Info</h3>
           <div className="flex lg:flex-row flex-col gap-4 w-full ">
             <div className="w-full">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <Input
-                id="firstName"
-                {...register("firstName", { required: "Name is required" })}
+                id="name"
+                {...register("name", { required: "Name is required" })}
                 defaultValue={"Name 2"}
               />
-              {errors.firstName && (
-                <p className="text-red-500 text-sm">
-                  {errors.firstName.message}
-                </p>
-              )}
-            </div>
-            <div className="w-full">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                {...register("lastName", { required: "Name is required" })}
-                defaultValue={"Name 2"}
-              />
-              {errors.lastName && (
-                <p className="text-red-500 text-sm">
-                  {errors.lastName.message}
-                </p>
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
               )}
             </div>
           </div>
@@ -230,26 +212,44 @@ export default function StudentRegistrationForm() {
       </section>
 
       {/* Course Details */}
-      <section className="border border-[#f5f5f5] p-4 rounded-lg">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Course Details</h3>
+      <section className="border  border-[#f5f5f5] p-4 rounded-lg">
+        <h3 className="text-lg font-semibold">Course Details</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
           <div>
-            <Label htmlFor="courseRef">Course Reference</Label>
-            <Input
-              id="courseRef"
-              {...register("courseRef", {
-                required: "Course Reference is required",
-              })}
-              defaultValue={"Course 1"}
-            />
-            {errors.courseRef && (
-              <p className="text-red-500 text-sm">{errors.courseRef.message}</p>
+            <Label htmlFor="course">Course</Label>
+            <Select
+              {...register("course", { required: "Course is required" })}
+              onValueChange={(value) => {
+                setValue("course", value);
+                clearErrors("course");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a course" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BScCSIT">BScCSIT</SelectItem>
+                <SelectItem value="BBM">BBM</SelectItem>
+                <SelectItem value="BCA">BCA</SelectItem>
+                <SelectItem value="BIM">BIM</SelectItem>
+                <SelectItem value="BIT">BIT</SelectItem>
+                <SelectItem value="BBS">BBS</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.course && (
+              <p className="text-red-500 text-sm">{errors.course.message}</p>
             )}
           </div>
 
           <div>
             <Label htmlFor="section">Section</Label>
-            <Select onValueChange={(value) => setValue("section", value)}>
+            <Select
+              {...register("section", { required: "Section is required" })}
+              onValueChange={(value) => {
+                setValue("section", value);
+                clearErrors("section");
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a section" />
               </SelectTrigger>
@@ -278,8 +278,8 @@ export default function StudentRegistrationForm() {
           </div>
         </div>
       </section>
+      {/* Contacts */}
       <section className="border border-[#f5f5f5] p-4 rounded-lg">
-        {/* Contacts */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Contacts</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -341,31 +341,57 @@ export default function StudentRegistrationForm() {
           </div>
         </div>
       </section>
+      {/* Photo Media */}
       <section className="border border-[#f5f5f5] p-4 rounded-lg">
-        {/* Photo Upload */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Photo Upload</h3>
-          <div>
-            <Label htmlFor="photo">Photo</Label>
-            <Input
-              id="photo"
-              type="file"
-              accept="image/*"
-              {...register("photoUrl")}
-              onChange={handleImageChange}
-            />
-            {errors.photoUrl && (
-              <p className="text-red-500 text-sm">{errors.photoUrl.message}</p>
-            )}
-            {imagePreview && (
+        <h3 className="text-lg font-semibold mb-2">Photo Media</h3>
+        <Label htmlFor="photo">Upload Student's photo</Label>
+        <div className="relative mt-4">
+          {imagePreview ? (
+            <div className="relative group w-40">
               <img
                 src={imagePreview}
-                alt="Preview"
-                className="mt-2 w-32 h-32 object-cover rounded"
+                alt="Selected Product"
+                className="w-full aspect-square object-cover rounded"
               />
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setImagePreview(null);
+                  setSelectedImage(null);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center p-1"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ) : (
+            <div className="p-4 border border-dashed border-gray-300 rounded">
+              <p className="text-sm text-gray-500 mb-2">No image selected</p>
+              <Button
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("image-input")?.click();
+                }}
+                className="bg-gray-50 hover:bg-gray-100 flex items-center gap-2"
+              >
+                <Image size={16} />
+                Upload Image
+              </Button>
+            </div>
+          )}
         </div>
+        <Input
+          type="file"
+          {...register("photo")}
+          accept="image/*"
+          id="image-input"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+        {errors.photo && (
+          <p className="text-red-500 mt-2 text-xs">{errors.photo.message}</p>
+        )}
       </section>
 
       {/* Submit Button */}
@@ -391,12 +417,14 @@ export default function StudentRegistrationForm() {
           <DialogDescription>
             Are you sure you want to register this student?
           </DialogDescription>
-          <DialogFooter>
-            <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
-              Confirm
-            </Button>
-            <Button variant="secondary">Cancel</Button>
-          </DialogFooter>
+          <DialogClose asChild>
+            <DialogFooter>
+              <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
+                Confirm
+              </Button>
+              <Button variant="secondary">Cancel</Button>
+            </DialogFooter>
+          </DialogClose>
         </DialogContent>
       </Dialog>
     </form>
