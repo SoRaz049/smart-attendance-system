@@ -4,14 +4,14 @@ export interface StudentDetails {
   email: string;
   address: string;
   dateOfBirth: string;
-  courseRef: {
-    name: string;
-    courseCode: string;
-  };
+  course: string;
+
   batch: string;
   section: string;
   contactNo: string;
   guardianName: string;
   guardianContact: string;
   photoUrl: string;
+  isPresent?: boolean;
+  isLate?: boolean;
 }

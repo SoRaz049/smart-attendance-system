@@ -71,9 +71,19 @@ export default function Component({
                     </AvatarFallback>
                   </Avatar>
                   <p className="text-xs mt-4">Today's Attendance:</p>
-                  <p className="text-white w-fit text-xs bg-green px-2 rounded-full mt-1">
-                    Present
-                  </p>
+                  {student.isPresent ? (
+                    <p className="text-white w-fit text-xs bg-green px-2 rounded-full mt-1">
+                      Present
+                    </p>
+                  ) : student.isLate ? (
+                    <p className="text-white w-fit text-xs border-green px-2 rounded-full mt-1">
+                      Late
+                    </p>
+                  ) : (
+                    <p className="text-white w-fit text-xs bg-red-500 px-2 rounded-full mt-1">
+                      Absent
+                    </p>
+                  )}
                 </div>
                 <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -94,7 +104,7 @@ export default function Component({
                   </div>
                   <div>
                     <h3 className="font-semibold">Course</h3>
-                    <p>{student.courseRef.name}</p>
+                    <p>{student.course}</p>
                   </div>
                   <div>
                     <h3 className="font-semibold">Batch</h3>
@@ -104,10 +114,7 @@ export default function Component({
                     <h3 className="font-semibold">Section</h3>
                     <p>{student.section}</p>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">Contact No.</h3>
-                    <p>{student.contactNo}</p>
-                  </div>
+
                   <div>
                     <h3 className="font-semibold">Guardian's Name</h3>
                     <p>{student.guardianName}</p>
